@@ -1,11 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"math"
 )
 
-func GenerateDatapoints(messages []Message) {
+func GenerateDatapoints(messages []Message) []int {
 	var TimeCorrelationPoints []int
 	Counter := -1
 	TimeHolding := float64(-1)
@@ -26,5 +25,5 @@ func GenerateDatapoints(messages []Message) {
 		Counter++
 		TimeHolding = CreationTimeHour
 	}
-	fmt.Println(len(TimeCorrelationPoints))
+	return TimeCorrelationPoints
 }
