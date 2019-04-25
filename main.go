@@ -1,18 +1,16 @@
 package main
 
 import (
-	"encoding/json"
-	"io/ioutil"
+	"os"
 
 	"github.com/joho/godotenv"
 )
 
 func main() {
 	godotenv.Load()
-	output, err := getGroupInformation(32945761)
+	output, err := GetGroupMessages(42591250, os.Getenv("ACCESS_TOKEN"))
 	if err != nil {
 		panic(err)
 	}
-	data, _ := json.MarshalIndent(output, "", "    ")
-	_ = ioutil.WriteFile("test.json", data, 0777)
+	GenerateDatapoints(output)
 }

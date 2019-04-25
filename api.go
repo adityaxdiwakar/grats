@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 )
 
 type MultiGroupApiResponseObject struct {
@@ -21,6 +20,16 @@ type GroupApiResponseObject struct {
 		Code int `json:"code"`
 	} `json:"meta"`
 	Response GroupChat `json:"response"`
+}
+
+type MultiMessageApiResponseObject struct {
+	Meta struct {
+		Code int `json:"code"`
+	} `json:"meta"`
+	Response struct {
+		Count    int       `json:"count"`
+		Messages []Message `json:"messages"`
+	} `json:"response"`
 }
 
 type GroupChat struct {
@@ -61,8 +70,31 @@ type GroupChat struct {
 	UpdatedAt      int    `json:"updated_at"`
 }
 
-func GetGroupInformation(GroupID int) (GroupChat, error) {
-	url := fmt.Sprintf("https://api.groupme.com/v3/groups/%d?token=%s", groupID, os.Getenv("ACCESS_TOKEN"))
+type Message struct {
+	Attachments []struct {
+		Charmap     [][]int  `json:"charmap,omitempty"`
+		Placeholder string   `json:"placeholder,omitempty"`
+		Type        string   `json:"type"`
+		Loci        [][]int  `json:"loci,omitempty"`
+		UserIds     []string `json:"user_ids,omitempty"`
+	} `json:"attachments"`
+	AvatarURL   string        `json:"avatar_url"`
+	CreatedAt   int           `json:"created_at"`
+	FavoritedBy []interface{} `json:"favorited_by"`
+	GroupID     string        `json:"group_id"`
+	ID          string        `json:"id"`
+	Name        string        `json:"name"`
+	Platform    string        `json:"platform"`
+	SenderID    string        `json:"sender_id"`
+	SenderType  string        `json:"sender_type"`
+	SourceGUID  string        `json:"source_guid"`
+	System      bool          `json:"system"`
+	Text        string        `json:"text"`
+	UserID      string        `json:"user_id"`
+}
+
+func GetGroupInformation(GroupID int, token string) (GroupChat, error) {
+	url := fmt.Sprintf("https://api.groupme.com/v3/groups/%d?token=%s", GroupID, token)
 	resp, _ := http.Get(url)
 	if resp.StatusCode != 200 {
 		err := fmt.Sprintf("GM-API did not return 200 response, instead returned %d", resp.StatusCode)
@@ -76,10 +108,10 @@ func GetGroupInformation(GroupID int) (GroupChat, error) {
 	return GroupReturn.Response, nil
 }
 
-func GetGroupListing() ([]GroupChat, error) {
+func GetGroupListing(token string) ([]GroupChat, error) {
 	GroupChats := []GroupChat{}
 	for index := 1; true; index++ {
-		url := fmt.Sprintf("https://api.groupme.com/v3/groups?per_page=100&token=%s&page=%d", os.Getenv("ACCESS_TOKEN"), index)
+		url := fmt.Sprintf("https://api.groupme.com/v3/groups?per_page=100&token=%s&page=%d", token, index)
 		resp, _ := http.Get(url)
 		body, _ := ioutil.ReadAll(resp.Body)
 
@@ -94,5 +126,26 @@ func GetGroupListing() ([]GroupChat, error) {
 		data, _ := json.MarshalIndent(GroupResp, "", "    ")
 		_ = ioutil.WriteFile("test.json", data, 0644)
 	}
-	return GroupChat{}, nil
+	return []GroupChat{}, nil
+}
+
+func GetGroupMessages(GroupID int, token string) ([]Message, error) {
+	GroupMessages := []Message{}
+	BeforeID := "2155619732562118754"
+
+	for {
+		url := fmt.Sprintf("https://api.groupme.com/v3/groups/%d/messages?token=%s&limit=100&before_id=%s", GroupID, token, BeforeID)
+		resp, _ := http.Get(url)
+		body, _ := ioutil.ReadAll(resp.Body)
+
+		MessageResp := MultiMessageApiResponseObject{}
+		json.Unmarshal([]byte(body), &MessageResp)
+		GroupMessages = append(GroupMessages, MessageResp.Response.Messages...)
+		BeforeID = GroupMessages[len(GroupMessages)-1].ID
+
+		if len(MessageResp.Response.Messages) < 100 {
+			return GroupMessages, nil
+		}
+	}
+	return []Message{}, nil
 }
