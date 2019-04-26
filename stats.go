@@ -5,28 +5,28 @@ import (
 )
 
 func GenerateDatapoints(messages []Message) []int {
-	var TimeCorrelationPoints []int
-	TimeGrouping := 3600 * 24
-	Counter := -1
-	TimeHolding := float64(-1)
+	var timeCorrelationPoints []int
+	timeGrouping := 3600
+	counter := -1
+	timeHolding := float64(-1)
 	for i := 0; i < len(messages); i++ {
-		CreationTimestamp := messages[len(messages)-1-i].CreatedAt
-		CreationTimeHour := math.Floor(float64(CreationTimestamp / TimeGrouping))
-		if TimeHolding != -1 && CreationTimeHour != TimeHolding {
+		creationTimestamp := messages[len(messages)-1-i].CreatedAt
+		creationTimeHour := math.Floor(float64(creationTimestamp / timeGrouping))
+		if timeHolding != -1 && creationTimeHour != timeHolding {
 			for {
-				if TimeHolding+1 != CreationTimeHour {
-					TimeCorrelationPoints = append(TimeCorrelationPoints, 0)
-					TimeHolding++
+				if timeHolding+1 != creationTimeHour {
+					timeCorrelationPoints = append(timeCorrelationPoints, 0)
+					timeHolding++
 				} else {
 					break
 				}
 			}
-			TimeCorrelationPoints = append(TimeCorrelationPoints, Counter)
-			Counter = 0
+			timeCorrelationPoints = append(timeCorrelationPoints, counter)
+			counter = 0
 		}
-		Counter++
-		TimeHolding = CreationTimeHour
+		counter++
+		timeHolding = creationTimeHour
 	}
-	TimeCorrelationPoints = append(TimeCorrelationPoints, Counter)
-	return TimeCorrelationPoints
+	timeCorrelationPoints = append(timeCorrelationPoints, counter)
+	return timeCorrelationPoints
 }

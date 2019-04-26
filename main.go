@@ -1,7 +1,7 @@
 package main
 
 import (
-	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 
@@ -10,12 +10,26 @@ import (
 
 func main() {
 	godotenv.Load()
-	output, err := GetGroupMessages(49006254, os.Getenv("ACCESS_TOKEN"))
+	output, err := GetGroupMessages(32945761, os.Getenv("ACCESS_TOKEN"))
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println(len(output))
 	datapoints := GenerateDatapoints(output)
-	payload, _ := json.MarshalIndent(datapoints, "", "     ")
+	var newDatapoints []int
+	for i := 0; i < len(datapoints); i++ {
+		if i == 0 {
+			newDatapoints = append(newDatapoints, datapoints[i])
+		} else {
+			newDatapoints = append(newDatapoints, datapoints[i]+newDatapoints[i-1])
+		}
+	}
 
-	_ = ioutil.WriteFile("test.json", payload, 0644)
+	//payload, _ := json.MarshalIndent(newDatapoints, "", "     ")
+
+	var s string
+	for i := 0; i < len(newDatapoints); i++ {
+		s = s + fmt.Sprintf("%d\n", newDatapoints[i])
+	}
+	_ = ioutil.WriteFile("test.json", []byte(s), 0644)
 }

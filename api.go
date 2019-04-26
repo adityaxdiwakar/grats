@@ -132,12 +132,10 @@ func GetGroupListing(token string) ([]GroupChat, error) {
 func GetGroupMessages(GroupID int, token string) ([]Message, error) {
 	GroupMessages := []Message{}
 	BeforeID := "2155619732562118754"
-
 	for {
 		url := fmt.Sprintf("https://api.groupme.com/v3/groups/%d/messages?token=%s&limit=100&before_id=%s", GroupID, token, BeforeID)
 		resp, _ := http.Get(url)
 		body, _ := ioutil.ReadAll(resp.Body)
-
 		MessageResp := MultiMessageApiResponseObject{}
 		json.Unmarshal([]byte(body), &MessageResp)
 		GroupMessages = append(GroupMessages, MessageResp.Response.Messages...)
