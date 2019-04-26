@@ -1,0 +1,3 @@
+[submodule "github.com/joho/godotenv"]
+	path = github.com/joho/godotenv
+	url = https://github.com/joho/godotenv

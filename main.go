@@ -10,52 +10,53 @@ import (
 
 func main() {
 	godotenv.Load()
-	output, err := GetGroupMessages(44330425, os.Getenv("ACCESS_TOKEN"))
+	output, err := GetGroupMessages(49006254, os.Getenv("ACCESS_TOKEN"))
 	if err != nil {
 		panic(err)
 	}
-	x := SeperateUsers(output)
-	y := make(map[string][]int)
-	for person := range x {
-		for i := 0; i < len(x[person]); i++ {
+	seperateOutput := SeperateUsers(output)
+	seperatedMessages := make(map[string][]int)
+	for person := range seperateOutput {
+		for i := 0; i < len(seperateOutput[person]); i++ {
 			if i == 0 {
-				y[person] = append(y[person], x[person][i])
+				seperatedMessages[person] = append(seperatedMessages[person], seperateOutput[person][i])
 			} else {
-				y[person] = append(y[person], x[person][i]+y[person][i-1])
+				seperatedMessages[person] = append(seperatedMessages[person], seperateOutput[person][i]+seperatedMessages[person][i-1])
 			}
 		}
 	}
 
 	maxLength := 0
-	for person := range y {
-		length := len(y[person])
-		fmt.Println(length)
+	for person := range seperatedMessages {
+		length := len(seperatedMessages[person])
 		if length > maxLength {
 			maxLength = length
 		}
 	}
 
+	var namelessArray [][]int
+	var people []string
+	for person := range seperatedMessages {
+		people = append(people, person)
+		namelessArray = append(namelessArray, seperatedMessages[person])
+	}
 	var s string
-	for person := range y {
-		s = s + person + ","
+	for i := 0; i < len(people); i++ {
+		s += people[i] + ","
 	}
 	s += "\n"
 	for i := 0; i < maxLength; i++ {
-		for person := range y {
-			if i < len(y[person]) {
-				additiveString := fmt.Sprintf("%d,", y[person][i])
-				s = s + additiveString
-				if y[person][i] == 0 && i > 200 {
-					fmt.Println(y[person][i])
-					panic(":)")
-				}
+		fmt.Println(100 * i / maxLength)
+		for h := 0; h < len(namelessArray); h++ {
+			if i < len(namelessArray[h]) {
+				s += fmt.Sprintf("%d,", namelessArray[h][i])
 			} else {
-				s = s + fmt.Sprintf("%d,", y[person][len(y[person])-1])
+				s += fmt.Sprintf("%d,", namelessArray[h][len(namelessArray[h])-1])
 			}
 		}
 		s += "\n"
 	}
 
 	//payload, _ := json.MarshalIndent(y, "", "    ")
-	_ = ioutil.WriteFile("data", []byte(s), 0644)
+	_ = ioutil.WriteFile("data.csv", []byte(s), 0644)
 }

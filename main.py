@@ -1,7 +1,7 @@
 import json
 
 data = json.load(
-    open("test.json", "r")
+    open("data.json", "r")
 )
 
 max_length = 0
