@@ -21,6 +21,7 @@ func GenerateDatapoints(messages []Message) []int {
 				}
 			}
 			TimeCorrelationPoints = append(TimeCorrelationPoints, Counter)
+			Counter = 0
 		}
 		Counter++
 		TimeHolding = CreationTimeHour
